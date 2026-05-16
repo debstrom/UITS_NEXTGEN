@@ -117,6 +117,7 @@ function showToast(msg, isError = false) {
 
 
 // ===== HANDLE LOGIN =====
+// ===== HANDLE LOGIN =====
 function handleLogin() {
   const id   = document.getElementById('loginId').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
@@ -133,8 +134,10 @@ function handleLogin() {
   const roleLabel = currentRole === 'student' ? 'Student' : 'Teacher';
   showToast(`✅ Welcome! Logging you in as ${roleLabel}...`);
 
-  // In a real app: send fetch request to your backend here
-  // fetch('/api/login', { method: 'POST', body: JSON.stringify({ id, pass, role: currentRole }) })
+  // Redirect after short delay so user sees the toast
+  setTimeout(() => {
+    window.location.href = './DashBoard/dashboard.html';
+  }, 1500);
 }
 
 
