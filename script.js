@@ -117,7 +117,6 @@ function showToast(msg, isError = false) {
 
 
 // ===== HANDLE LOGIN =====
-// ===== HANDLE LOGIN =====
 function handleLogin() {
   const id   = document.getElementById('loginId').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
@@ -130,20 +129,22 @@ function handleLogin() {
     return;
   }
 
-  // Simulate login success
   const roleLabel = currentRole === 'student' ? 'Student' : 'Teacher';
   showToast(`✅ Welcome! Logging you in as ${roleLabel}...`);
 
-  // Redirect after short delay so user sees the toast
+  // ✅ FIXED: Route each role to its own dashboard
   setTimeout(() => {
-    window.location.href = './DashBoard/dashboard.html';
+    if (currentRole === 'student') {
+      window.location.href = './DashBoard/dashboard.html';
+    } else {
+      window.location.href = './TeacherPanel/teacher.html'; // ← update this path if needed
+    }
   }, 1500);
 }
 
 
 // ===== HANDLE SIGN UP =====
 function handleSignup() {
-  // Collect all signup fields from the form
   const signupForm = document.getElementById('signupForm');
   const inputs     = signupForm.querySelectorAll('input');
 
@@ -168,11 +169,7 @@ function handleSignup() {
   const roleLabel = currentRole === 'student' ? 'Student' : 'Teacher';
   showToast(`✅ ${roleLabel} account created! Please log in.`);
 
-  // Switch back to login after short delay
   setTimeout(() => switchTab('login'), 1800);
-
-  // In a real app: send fetch request to your backend here
-  // fetch('/api/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, roleId, dept, pass, role: currentRole }) })
 }
 
 
@@ -185,11 +182,11 @@ function validateEmail(email) {
 // ===== ENTER KEY SUPPORT =====
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
-    if (currentTab === 'login')  handleLogin();
-    else                         handleSignup();
+    if (currentTab === 'login') handleLogin();
+    else                        handleSignup();
   }
 });
 
 
 // ===== INIT =====
-updateHeadings();a
+updateHeadings();
