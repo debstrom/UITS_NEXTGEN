@@ -1,8 +1,11 @@
+// ===== CONFIG =====
+const API_URL = 'http://localhost:7001';
+
+
 // ===== THEME TOGGLE =====
 const themeToggle = document.getElementById('themeToggle');
 const html = document.documentElement;
 
-// Load saved preference
 const savedTheme = localStorage.getItem('portalTheme') || 'light';
 html.setAttribute('data-theme', savedTheme);
 themeToggle.checked = savedTheme === 'dark';
@@ -15,8 +18,8 @@ themeToggle.addEventListener('change', () => {
 
 
 // ===== STATE =====
-let currentTab  = 'login';   // 'login' | 'signup'
-let currentRole = 'student'; // 'student' | 'teacher'
+let currentTab  = 'login';    // 'login' | 'signup'
+let currentRole = 'student';  // 'student' | 'teacher'
 
 
 // ===== SWITCH TAB =====
@@ -51,21 +54,19 @@ function switchRole(role) {
   document.getElementById('roleStudent').classList.toggle('active', role === 'student');
   document.getElementById('roleTeacher').classList.toggle('active', role === 'teacher');
 
-  // Update placeholder text for login ID field
   const loginIdInput = document.getElementById('loginId');
   if (loginIdInput) {
     loginIdInput.placeholder = role === 'student' ? 'Student ID or Email' : 'Teacher ID or Email';
   }
 
-  // Update signup ID field
-  const signupIdInput  = document.getElementById('signupId');
-  const signupIdWrap   = document.getElementById('signupIdWrap');
-  if (signupIdInput && signupIdWrap) {
-    if (role === 'teacher') {
-      signupIdInput.placeholder = 'Teacher ID / Employee ID';
-    } else {
-      signupIdInput.placeholder = 'Student ID';
-    }
+  const signupIdInput = document.getElementById('signupId');
+  if (signupIdInput) {
+    signupIdInput.placeholder = role === 'teacher' ? 'Teacher ID / Employee ID' : 'Student ID';
+  }
+
+  const adminNotice = document.getElementById('adminNotice');
+  if (adminNotice) {
+    adminNotice.style.display = (role === 'teacher' && currentTab === 'login') ? 'block' : 'none';
   }
 
   updateHeadings();
@@ -84,6 +85,12 @@ function updateHeadings() {
   } else {
     title.textContent = `${roleLabel} Sign Up`;
     sub.textContent   = `Create your ${roleLabel.toLowerCase()} account`;
+  }
+
+  const adminNotice = document.getElementById('adminNotice');
+  if (adminNotice) {
+    adminNotice.style.display =
+      (currentRole === 'teacher' && currentTab === 'login') ? 'block' : 'none';
   }
 }
 
@@ -117,65 +124,138 @@ function showToast(msg, isError = false) {
 
 
 // ===== HANDLE LOGIN =====
-function handleLogin() {
+async function handleLogin() {
   const id   = document.getElementById('loginId').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
 
   if (!id)   { showToast('Please enter your ID or Email', true); return; }
   if (!pass) { showToast('Please enter your password', true); return; }
-
   if (pass.length < 4) {
     showToast('Password must be at least 4 characters', true);
     return;
   }
 
-  const roleLabel = currentRole === 'student' ? 'Student' : 'Teacher';
-  showToast(`✅ Welcome! Logging you in as ${roleLabel}...`);
+  showToast('Logging in...');
 
-  // ✅ FIXED: Route each role to its own dashboard
-  setTimeout(() => {
-    if (currentRole === 'student') {
-      window.location.href = './DashBoard/dashboard.html';
-    } else {
-      window.location.href = './TeacherPanel/teacher.html'; // ← update this path if needed
+  try {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier: id, password: pass, role: currentRole }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showToast(data.message || 'Login failed', true);
+      return;
     }
-  }, 1500);
+
+    localStorage.setItem('uits_token', data.token);
+    localStorage.setItem('uits_user', JSON.stringify(data.user));
+    showToast(`✅ Welcome back, ${data.user.firstName}!`);
+
+    setTimeout(() => {
+      window.location.href = currentRole === 'student'
+        ? './DashBoard/dashboard.html'
+        : './TeacherPanel/teacher.html';
+    }, 1000);
+
+  } catch {
+    showToast('Cannot reach server. Is the backend running?', true);
+  }
 }
 
 
 // ===== HANDLE SIGN UP =====
-function handleSignup() {
+async function handleSignup() {
   const signupForm = document.getElementById('signupForm');
   const inputs     = signupForm.querySelectorAll('input');
 
-  const firstName  = inputs[0].value.trim();
-  const lastName   = inputs[1].value.trim();
-  const email      = inputs[2].value.trim();
-  const roleId     = inputs[3].value.trim();
-  const dept       = inputs[4].value.trim();
-  const pass       = document.getElementById('signupPass').value.trim();
-  const pass2      = document.getElementById('signupPass2').value.trim();
+  const firstName = inputs[0].value.trim();
+  const lastName  = inputs[1].value.trim();
+  const email     = inputs[2].value.trim();
+  const roleId    = inputs[3].value.trim();
+  const dept      = inputs[4].value.trim();
+  const pass      = document.getElementById('signupPass').value.trim();
+  const pass2     = document.getElementById('signupPass2').value.trim();
 
-  if (!firstName)  { showToast('Please enter your first name', true); return; }
-  if (!lastName)   { showToast('Please enter your last name', true); return; }
-  if (!email)      { showToast('Please enter your email', true); return; }
+  if (!firstName) { showToast('Please enter your first name', true); return; }
+  if (!lastName)  { showToast('Please enter your last name', true); return; }
+  if (!email)     { showToast('Please enter your email', true); return; }
   if (!validateEmail(email)) { showToast('Please enter a valid email', true); return; }
-  if (!roleId)     { showToast(`Please enter your ${currentRole === 'student' ? 'Student' : 'Employee'} ID`, true); return; }
-  if (!dept)       { showToast('Please enter your department', true); return; }
-  if (!pass)       { showToast('Please enter a password', true); return; }
+  if (!roleId)    {
+    showToast(`Please enter your ${currentRole === 'student' ? 'Student' : 'Employee'} ID`, true);
+    return;
+  }
+  if (!dept)      { showToast('Please enter your department', true); return; }
+  if (!pass)      { showToast('Please enter a password', true); return; }
   if (pass.length < 6) { showToast('Password must be at least 6 characters', true); return; }
   if (pass !== pass2)  { showToast('Passwords do not match', true); return; }
 
-  const roleLabel = currentRole === 'student' ? 'Student' : 'Teacher';
-  showToast(`✅ ${roleLabel} account created! Please log in.`);
+  showToast('Creating your account...');
 
-  setTimeout(() => switchTab('login'), 1800);
+  try {
+    const response = await fetch(`${API_URL}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        roleId,
+        department: dept,
+        password: pass,
+        role: currentRole,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showToast(data.message || 'Signup failed', true);
+      return;
+    }
+
+    const roleLabel = currentRole === 'student' ? 'Student' : 'Teacher';
+    showToast(`✅ ${roleLabel} account created! Please log in.`);
+    setTimeout(() => switchTab('login'), 1800);
+
+  } catch {
+    showToast('Cannot reach server. Is the backend running?', true);
+  }
 }
 
 
 // ===== EMAIL VALIDATOR =====
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+
+// ===== MODAL HELPERS =====
+function openForgotPassword() {
+  document.getElementById('forgotModal').style.display = 'flex';
+}
+
+function openAdminInfo() {
+  document.getElementById('adminModal').style.display = 'flex';
+}
+
+function hideModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.style.display = 'none';
+}
+
+function submitForgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email || !validateEmail(email)) {
+    showToast('Please enter a valid email address', true);
+    return;
+  }
+  showToast('📧 Reset link sent! Check your inbox.');
+  hideModal('forgotModal');
+  document.getElementById('forgotEmail').value = '';
 }
 
 

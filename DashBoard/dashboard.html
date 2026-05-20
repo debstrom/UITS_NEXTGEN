@@ -1409,6 +1409,67 @@
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
+// ===== AUTH GUARD & USER DATA =====
+(function () {
+  const token = localStorage.getItem('uits_token');
+  const user  = JSON.parse(localStorage.getItem('uits_user') || 'null');
+
+  if (!token || !user) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+  const fullName = user.firstName + ' ' + user.lastName;
+  const roleTag  = user.role === 'student' ? 'BSc CSE' : 'Faculty';
+
+  // Welcome banner
+  const bannerH2 = document.querySelector('.welcome-text h2');
+  if (bannerH2) bannerH2.textContent = `Welcome back, ${fullName} 👋`;
+
+  // Sidebar footer
+  const avatarEl = document.querySelector('.user-avatar');
+  if (avatarEl) avatarEl.textContent = initials;
+
+  const sidebarName = document.querySelector('.user-mini-name');
+  if (sidebarName) sidebarName.textContent = fullName;
+
+  const sidebarRole = document.querySelector('.user-mini-role');
+  if (sidebarRole) sidebarRole.textContent = `${roleTag} · Spring 2026`;
+
+  // Profile page
+  const profileAvatar = document.querySelector('.profile-avatar');
+  if (profileAvatar) profileAvatar.textContent = initials;
+
+  const profileName = document.querySelector('.profile-name');
+  if (profileName) profileName.textContent = fullName;
+
+  const profileSub = document.querySelector('.profile-sub');
+  if (profileSub) profileSub.textContent =
+    (user.role === 'student' ? 'BSc in Computer Science & Engineering' : 'Faculty') +
+    ' · Spring 2026';
+
+  // Update profile fields by matching label text
+  document.querySelectorAll('.profile-field').forEach(function (field) {
+    const label = field.querySelector('label');
+    const val   = field.querySelector('.val');
+    if (!label || !val) return;
+    switch (label.textContent.trim()) {
+      case 'Student ID':
+        if (user.role === 'teacher') label.textContent = 'Employee ID';
+        val.textContent = user.roleId;
+        break;
+      case 'Email':
+        val.textContent = user.email;
+        break;
+      case 'Department':
+        val.textContent = user.department;
+        break;
+    }
+  });
+})();
+</script>
+<script>
 // ===== DATA =====
 const COURSES = [
   { code: 'CSE0613211S', name: 'Data Structures and Algorithms I',        credits: 3.0, type: 'theory' },
@@ -1669,11 +1730,9 @@ function showToast(msg) {
 // ===== LOGOUT =====
 function handleLogout() {
   if (confirm('Are you sure you want to logout?')) {
-    showToast('👋 Logging out...');
-    setTimeout(() => {
-      document.body.style.opacity = '0';
-      document.body.style.transition = 'opacity 0.5s';
-    }, 500);
+    localStorage.removeItem('uits_token');
+    localStorage.removeItem('uits_user');
+    window.location.href = '../index.html';
   }
 }
 
