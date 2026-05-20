@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <!-- Tab favicon linking to UITS Wikipedia -->
+  <link rel="icon" type="image/png" href="/University_of_Information_Technology_and_Sciences_Seal.png" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Attendance Portal – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --bg-body: #eef0f5;
+      --bg-card: #ffffff;
+      --bg-input: #f4f6fb;
+      --text-primary: #1a1f36;
+      --text-secondary: #6b7280;
+      --text-label: #374151;
+      --border: #dde1ea;
+      --blue: #2563eb;
+      --blue-hover: #1d4ed8;
+      --blue-light: #eff6ff;
+      --shadow: 0 8px 40px rgba(37,99,235,0.10);
+      --shadow-card: 0 2px 16px rgba(0,0,0,0.07);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(.4,0,.2,1);
+      --sidebar-w: 240px;
+      --topbar-h: 64px;
+    }
+    [data-theme="dark"] {
+      --bg-body: #0f1117;
+      --bg-card: #1a1f2e;
+      --bg-input: #232840;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-label: #cbd5e1;
+      --border: #2d3348;
+      --blue: #3b82f6;
+      --blue-hover: #60a5fa;
+      --blue-light: #1e2940;
+      --shadow: 0 8px 40px rgba(0,0,0,0.4);
+      --shadow-card: 0 2px 16px rgba(0,0,0,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-body);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: linear-gradient(170deg, #0f1e50 0%, #1a3a8f 60%, #2563eb 100%);
+      display: flex;
+      flex-direction: column;
+      z-index: 200;
+      transition: transform var(--transition);
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-logo {
+      width: 48px; height: 48px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .sidebar-logo img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      padding: 4px;
+    }
+    .sidebar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.15;
+    }
+    .sidebar-title span {
+      display: block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9.5px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.3px;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .sidebar-section {
+      padding: 18px 14px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      margin: 2px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: rgba(255,255,255,0.75);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all var(--transition);
+      text-decoration: none;
+      position: relative;
+      user-select: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.10); color: #fff; }
+    .nav-item.active {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-weight: 600;
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: -10px; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 60%;
+      background: #7eb4ff;
+      border-radius: 2px;
+    }
+    .nav-icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .user-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      display: grid; place-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(255,255,255,0.3);
+    }
+    .user-mini-info { flex: 1; overflow: hidden; }
+    .user-mini-name { font-size: 13px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-mini-role { font-size: 11px; color: rgba(255,255,255,0.5); }
+    .logout-btn {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.5); font-size: 18px;
+      transition: color var(--transition); flex-shrink: 0;
+    }
+    .logout-btn:hover { color: #fff; }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      position: fixed;
+      top: 0; left: var(--sidebar-w); right: 0;
+      height: var(--topbar-h);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      z-index: 150;
+      transition: background var(--transition), border var(--transition);
+    }
+    .topbar-hamburger {
+      display: none;
+      background: none; border: none;
+      font-size: 22px; cursor: pointer;
+      color: var(--text-primary);
+      padding: 4px; margin-right: 4px;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .topbar-logo-img {
+      width: 38px; height: 38px;
+      object-fit: contain;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .topbar-brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .topbar-brand-short {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .topbar-brand-full {
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+    }
+    @media (max-width: 820px) {
+      .topbar-brand-full { display: none; }
+    }
+
+    .topbar-search {
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 16px;
+      gap: 8px;
+      transition: border var(--transition), box-shadow var(--transition);
+      width: 220px;
+    }
+    .topbar-search:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+    }
+    .topbar-search input {
+      border: none; background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      color: var(--text-primary);
+      outline: none; width: 100%;
+    }
+    .topbar-search input::placeholder { color: var(--text-secondary); }
+
+    .topbar-icons { display: flex; align-items: center; gap: 6px; }
+    .icon-btn {
+      position: relative;
+      background: none; border: none; cursor: pointer;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 19px;
+      color: var(--text-secondary);
+      transition: background var(--transition), color var(--transition);
+    }
+    .icon-btn:hover { background: var(--bg-input); color: var(--text-primary); }
+    .icon-btn .dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 8px; height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+    }
+
+    .toggle-wrap-inline {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px;
+    }
+    .toggle-switch { position: relative; width: 38px; height: 20px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: var(--blue); border-radius: 999px; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .slider::before {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; left: 3px; top: 3px;
+      background: white; border-radius: 50%;
+      transition: transform var(--transition);
+    }
+    .toggle-switch input:checked + .slider::before { transform: translateX(18px); }
+    .t-icon { font-size: 13px; }
+
+    /* ===== NOTIFICATION PANEL ===== */
+    .notif-panel {
+      position: fixed;
+      top: var(--topbar-h); right: 0;
+      width: 340px;
+      height: calc(100vh - var(--topbar-h));
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
+      z-index: 140;
+      transform: translateX(100%);
+      transition: transform var(--transition);
+      display: flex; flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.07);
+    }
+    .notif-panel.open { transform: translateX(0); }
+    .notif-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .notif-header h3 { font-size: 15px; font-weight: 600; }
+    .notif-header span {
+      font-size: 12px; color: var(--blue); cursor: pointer; font-weight: 500;
+    }
+    .notif-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+    .notif-item {
+      display: flex; gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+    .notif-item:hover { background: var(--bg-input); }
+    .notif-item.unread { background: var(--blue-light); }
+    .notif-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--blue); flex-shrink: 0; margin-top: 5px;
+    }
+    .notif-dot.read { background: var(--border); }
+    .notif-body { flex: 1; }
+    .notif-body p { font-size: 13px; line-height: 1.45; color: var(--text-primary); }
+    .notif-body small { font-size: 11px; color: var(--text-secondary); margin-top: 3px; display: block; }
+
+    /* ===== PAGE SECTIONS ===== */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-wrap {
+      margin-left: var(--sidebar-w);
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+      transition: margin-left var(--transition);
+    }
+    .main-content { padding: 28px 28px 48px; }
+
+    /* ===== WELCOME BANNER ===== */
+    .welcome-banner {
+      background: linear-gradient(130deg, #0f1e50 0%, #2563eb 100%);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+    .welcome-banner::after {
+      content: '';
+      position: absolute; right: -40px; top: -40px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .welcome-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 700; color: #fff;
+      margin-bottom: 6px;
+    }
+    .welcome-text p { font-size: 13.5px; color: rgba(255,255,255,0.72); }
+    .welcome-badge {
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .welcome-badge .sem { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
+    .welcome-badge .sem-name { font-size: 15px; font-weight: 700; color: #fff; }
+
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+      transition: background var(--transition), border var(--transition), transform var(--transition);
+      cursor: default;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: grid; place-items: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .stat-icon.blue { background: var(--blue-light); }
+    .stat-icon.green { background: #f0fdf4; }
+    .stat-icon.amber { background: #fffbeb; }
+    .stat-icon.red { background: #fef2f2; }
+    [data-theme="dark"] .stat-icon.green { background: #052e16; }
+    [data-theme="dark"] .stat-icon.amber { background: #1c1505; }
+    [data-theme="dark"] .stat-icon.red { background: #1f0505; }
+    .stat-info { flex: 1; }
+    .stat-info .val { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .stat-info .lbl { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+    /* ===== SECTION HEADER ===== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      margin-top: 8px;
+    }
+    .section-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .section-header .sub { font-size: 12.5px; color: var(--text-secondary); }
+    .tag-running {
+      display: inline-block;
+      background: #dcfce7; color: #166534;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+    [data-theme="dark"] .tag-running { background: #052e16; color: #4ade80; }
+
+    /* ===== COURSE TABLE ===== */
+    .course-table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 28px;
+    }
+    .course-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .course-table thead {
+      background: var(--bg-input);
+      border-bottom: 1.5px solid var(--border);
+    }
+    .course-table th {
+      padding: 13px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .course-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .course-table tr:last-child td { border-bottom: none; }
+    .course-table tbody tr { transition: background var(--transition); }
+    .course-table tbody tr:hover { background: var(--bg-input); }
+    .course-code {
+      font-weight: 600;
+      color: var(--blue);
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+    .course-name { font-weight: 500; line-height: 1.4; }
+    .credit-pill {
+      background: var(--blue-light);
+      color: var(--blue);
+      font-size: 12px; font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .row-num {
+      width: 28px; height: 28px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: inline-grid; place-items: center;
+      font-size: 12px; font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* ===== QR SCANNER ===== */
+    .scan-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 28px 32px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .scan-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--blue), #60a5fa, var(--blue));
+      background-size: 200% 100%;
+      animation: shimmer 2s linear infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .scan-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 6px;
+    }
+    .scan-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+
+    .qr-viewport {
+      position: relative;
+      width: 300px; height: 300px;
+      margin: 0 auto 20px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      border: 2px solid var(--border);
+      box-shadow: 0 4px 24px rgba(37,99,235,0.15);
+    }
+    #qr-video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .qr-frame {
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+    .qr-frame::before, .qr-frame::after,
+    .qr-frame span::before, .qr-frame span::after {
+      content: '';
+      position: absolute;
+      width: 36px; height: 36px;
+      border-color: #3b82f6;
+      border-style: solid;
+    }
+    .qr-frame::before  { top:16px;    left:16px;  border-width:3px 0 0 3px; border-radius:6px 0 0 0; }
+    .qr-frame::after   { top:16px;    right:16px; border-width:3px 3px 0 0; border-radius:0 6px 0 0; }
+    .qr-frame span::before { bottom:16px; left:16px;  border-width:0 0 3px 3px; border-radius:0 0 0 6px; }
+    .qr-frame span::after  { bottom:16px; right:16px; border-width:0 3px 3px 0; border-radius:0 0 6px 0; }
+
+    .qr-laser {
+      position: absolute;
+      left: 16px; right: 16px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+      border-radius: 1px;
+      animation: laserScan 2s ease-in-out infinite;
+      box-shadow: 0 0 8px rgba(59,130,246,0.8);
+    }
+    @keyframes laserScan {
+      0%   { top: 20px;  opacity: 1; }
+      48%  { top: calc(100% - 20px); opacity: 1; }
+      50%  { top: calc(100% - 20px); opacity: 0; }
+      52%  { top: 20px; opacity: 0; }
+      54%  { top: 20px; opacity: 1; }
+      100% { top: 20px; opacity: 1; }
+    }
+
+    .qr-idle {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: var(--bg-input); gap: 10px;
+    }
+    .qr-idle-icon { font-size: 52px; }
+    .qr-idle p { font-size: 13px; color: var(--text-secondary); }
+
+    .qr-result-overlay {
+      position: absolute; inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px;
+      border-radius: 16px;
+    }
+    .qr-result-overlay.success { background: rgba(22,163,74,0.92); display: flex; }
+    .qr-result-overlay.error   { background: rgba(220,38,38,0.92);  display: flex; }
+    .qr-result-overlay .res-icon { font-size: 48px; }
+    .qr-result-overlay .res-msg { font-size: 15px; font-weight: 600; color: #fff; text-align: center; padding: 0 16px; white-space: pre-line; }
+
+    .scan-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+
+    .btn-scan {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      box-shadow: 0 4px 16px rgba(37,99,235,0.28);
+    }
+    .btn-scan:hover { background: var(--blue-hover); transform: translateY(-1px); }
+    .btn-scan:active { transform: translateY(0); }
+    .btn-scan:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .btn-stop {
+      display: none;
+      align-items: center; gap: 8px;
+      background: #ef4444; color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .btn-stop:hover { background: #dc2626; }
+
+    .scan-status {
+      font-size: 13px; color: var(--text-secondary);
+      min-height: 20px; margin-top: 4px;
+    }
+    .scan-status.active { color: var(--blue); font-weight: 500; }
+    .scan-status.ok     { color: #16a34a; font-weight: 600; }
+    .scan-status.err    { color: #ef4444; font-weight: 600; }
+
+    .scan-course-row {
+      display: flex; align-items: center; gap: 10px;
+      justify-content: center; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .scan-course-row label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .scan-course-row select {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      color: var(--text-primary);
+      outline: none;
+      cursor: pointer;
+      transition: border var(--transition);
+      max-width: 280px;
+    }
+    .scan-course-row select:focus { border-color: var(--blue); }
+
+    .scan-history { margin-top: 20px; text-align: left; }
+    .scan-history h4 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+    .history-item .h-icon { font-size: 16px; flex-shrink: 0; }
+    .history-item .h-info { flex: 1; }
+    .history-item .h-name { font-weight: 600; color: var(--text-primary); }
+    .history-item .h-time { font-size: 11.5px; color: var(--text-secondary); }
+    .history-item .h-tag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+    .h-tag.present { background: #dcfce7; color: #166534; }
+    [data-theme="dark"] .h-tag.present { background: #052e16; color: #4ade80; }
+
+    /* ===== ATTENDANCE PAGE ===== */
+    .attendance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .att-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .att-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .att-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+    .att-card-code { font-size: 11.5px; font-weight: 700; color: var(--blue); letter-spacing: 0.5px; }
+    .att-card-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-top: 3px; line-height: 1.35; }
+    .att-pct {
+      font-size: 1.6rem; font-weight: 800;
+      line-height: 1;
+    }
+    .att-pct.good { color: #16a34a; }
+    .att-pct.warn { color: #d97706; }
+    .att-pct.bad  { color: #dc2626; }
+    .att-bar-bg {
+      height: 6px; background: var(--border); border-radius: 999px;
+      overflow: hidden; margin: 10px 0 8px;
+    }
+    .att-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .att-bar-fill.good { background: #16a34a; }
+    .att-bar-fill.warn { background: #d97706; }
+    .att-bar-fill.bad  { background: #dc2626; }
+    .att-meta { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-secondary); }
+
+    /* ===== SCHEDULE PAGE ===== */
+    .schedule-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .schedule-day-label {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-secondary);
+      padding: 8px 0 4px;
+    }
+    .schedule-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: var(--shadow-card);
+      transition: transform var(--transition);
+    }
+    .schedule-item:hover { transform: translateX(4px); }
+    .schedule-time {
+      font-size: 13px; font-weight: 700; color: var(--blue);
+      white-space: nowrap; min-width: 90px;
+    }
+    .schedule-info { flex: 1; }
+    .schedule-course { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .schedule-room { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .schedule-badge {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px;
+      background: var(--blue-light); color: var(--blue);
+      white-space: nowrap;
+    }
+
+    /* ===== RESULTS PAGE ===== */
+    .results-table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 28px;
+    }
+    .results-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .results-table thead { background: var(--bg-input); border-bottom: 1.5px solid var(--border); }
+    .results-table th {
+      padding: 13px 16px; text-align: left;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--text-secondary);
+    }
+    .results-table td {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      color: var(--text-primary); vertical-align: middle;
+    }
+    .results-table tr:last-child td { border-bottom: none; }
+    .results-table tbody tr:hover { background: var(--bg-input); }
+    .grade-pill {
+      display: inline-block;
+      font-size: 13px; font-weight: 700;
+      padding: 3px 12px; border-radius: 999px;
+    }
+    .grade-A { background: #dcfce7; color: #166534; }
+    .grade-B { background: #dbeafe; color: #1d4ed8; }
+    .grade-C { background: #fef9c3; color: #854d0e; }
+    .grade-NA { background: var(--bg-input); color: var(--text-secondary); }
+    [data-theme="dark"] .grade-A { background: #052e16; color: #4ade80; }
+    [data-theme="dark"] .grade-B { background: #1e3a5f; color: #60a5fa; }
+    [data-theme="dark"] .grade-C { background: #1c1505; color: #fbbf24; }
+
+    /* ===== PROFILE PAGE ===== */
+    .profile-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .profile-top { display: flex; align-items: center; gap: 24px; margin-bottom: 28px; }
+    .profile-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #60a5fa);
+      display: grid; place-items: center;
+      font-size: 28px; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+      border: 3px solid var(--border);
+    }
+    .profile-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--text-primary);
+    }
+    .profile-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+    .profile-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .profile-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); }
+    .profile-field .val { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-top: 4px; }
+
+    /* ===== SETTINGS PAGE ===== */
+    .settings-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .settings-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: 14px;
+      background: var(--bg-input);
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row:hover { background: var(--bg-input); }
+    .settings-label { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .settings-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .settings-toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .settings-toggle input { opacity: 0; width: 0; height: 0; }
+    .settings-slider {
+      position: absolute; inset: 0;
+      background: var(--border); border-radius: 999px; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .settings-toggle input:checked + .settings-slider { background: var(--blue); }
+    .settings-slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; top: 3px;
+      background: white; border-radius: 50%;
+      transition: transform var(--transition);
+    }
+    .settings-toggle input:checked + .settings-slider::before { transform: translateX(20px); }
+
+    /* ===== ACADEMIC CALENDAR ===== */
+    .calendar-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .cal-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+    .cal-date {
+      background: var(--blue-light);
+      color: var(--blue);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      text-align: center;
+      min-width: 58px;
+      flex-shrink: 0;
+    }
+    .cal-date .month { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .cal-date .day { font-size: 1.4rem; font-weight: 800; line-height: 1.1; }
+    .cal-info { flex: 1; }
+    .cal-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .cal-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .cal-type {
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .cal-type.holiday { background: #fef2f2; color: #dc2626; }
+    .cal-type.exam { background: #fef9c3; color: #854d0e; }
+    .cal-type.event { background: var(--blue-light); color: var(--blue); }
+    [data-theme="dark"] .cal-type.holiday { background: #1f0505; color: #f87171; }
+    [data-theme="dark"] .cal-type.exam { background: #1c1505; color: #fbbf24; }
+
+    /* ===== OVERLAY ===== */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 190;
+    }
+    .overlay.show { display: block; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      :root { --sidebar-w: 210px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .topbar-search { width: 160px; }
+    }
+    @media (max-width: 820px) {
+      :root { --sidebar-w: 240px; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .main-wrap { margin-left: 0; }
+      .topbar { left: 0; }
+      .topbar-hamburger { display: grid; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .topbar-search { display: none; }
+      .notif-panel { top: var(--topbar-h); }
+    }
+    @media (max-width: 560px) {
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .main-content { padding: 16px 14px 40px; }
+      .welcome-banner { flex-direction: column; gap: 14px; align-items: flex-start; }
+      .welcome-badge { width: 100%; }
+      .course-table th:nth-child(2), .course-table td:nth-child(2) { display: none; }
+      .notif-panel { width: 100%; }
+      .topbar { padding: 0 14px; gap: 10px; }
+    }
+    @media (max-width: 400px) {
+      .stats-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">
+      <!-- ✏️ Replace "your-logo.png" with your actual UITS logo file path -->
+      <img src="/University_of_Information_Technology_and_Sciences_Seal.png" alt="UITS Logo" />
+    </div>
+    <div class="sidebar-title">
+      UITS
+      <span>University of Information<br>Technology and Sciences</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">Main</div>
+  <a class="nav-item active" onclick="navigate('dashboard', this)">
+    <span class="nav-icon">🏠</span> Dashboard
+  </a>
+  <a class="nav-item" onclick="navigate('courses', this)">
+    <span class="nav-icon">📚</span> My Courses
+  </a>
+  <a class="nav-item" onclick="navigate('attendance', this)">
+    <span class="nav-icon">✅</span> Attendance
+    <span class="nav-badge" id="attBadge">3</span>
+  </a>
+  <a class="nav-item" onclick="navigate('results', this)">
+    <span class="nav-icon">📋</span> Results
+  </a>
+
+  <div class="sidebar-section">Schedule</div>
+  <a class="nav-item" onclick="navigate('schedule', this)">
+    <span class="nav-icon">📅</span> Class Schedule
+  </a>
+  <a class="nav-item" onclick="navigate('calendar', this)">
+    <span class="nav-icon">🗓️</span> Academic Calendar
+  </a>
+
+  <div class="sidebar-section">Account</div>
+  <a class="nav-item" onclick="navigate('profile', this)">
+    <span class="nav-icon">👤</span> My Profile
+  </a>
+  <a class="nav-item" onclick="navigate('settings', this)">
+    <span class="nav-icon">⚙️</span> Settings
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="user-mini">
+      <div class="user-avatar">DB</div>
+      <div class="user-mini-info">
+        <div class="user-mini-name">Debjeet Baral</div>
+        <div class="user-mini-role">BSc CSE · Spring 2026</div>
+      </div>
+      <button class="logout-btn" title="Logout" onclick="handleLogout()">⏻</button>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <button class="topbar-hamburger" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-brand">
+    <!-- ✏️ Replace "your-logo.png" with your actual UITS logo file path -->
+    <img class="topbar-logo-img" src="/University_of_Information_Technology_and_Sciences_Seal.png" alt="UITS Logo" />
+    <div class="topbar-brand-text">
+      <span class="topbar-brand-short">UITS</span>
+      <span class="topbar-brand-full">University of Information Technology and Sciences</span>
+    </div>
+  </div>
+  <div class="topbar-search">
+    <span style="font-size:14px;color:var(--text-secondary)">🔍</span>
+    <input type="text" placeholder="Search courses..." id="searchInput" oninput="handleSearch(this.value)" />
+  </div>
+  <div class="topbar-icons">
+    <button class="icon-btn" onclick="toggleNotif()" title="Notifications">
+      🔔<span class="dot" id="notifDot"></span>
+    </button>
+    <button class="icon-btn" title="Messages" onclick="showToast('💬 Messaging coming soon!')">💬</button>
+    <div class="toggle-wrap-inline">
+      <span class="t-icon">☀️</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="themeToggle"/>
+        <span class="slider"></span>
+      </label>
+      <span class="t-icon">🌙</span>
+    </div>
+  </div>
+</header>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <h3>Notifications</h3>
+    <span onclick="markAllRead()">Mark all read</span>
+  </div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-item unread">
+      <div class="notif-dot"></div>
+      <div class="notif-body">
+        <p>Attendance marked for <strong>Data Structures Lab</strong> – today 09:30 AM</p>
+        <small>2 minutes ago</small>
+      </div>
+    </div>
+    <div class="notif-item unread">
+      <div class="notif-dot"></div>
+      <div class="notif-body">
+        <p>Your <strong>Digital Logic Design</strong> class starts in 30 minutes</p>
+        <small>28 minutes ago</small>
+      </div>
+    </div>
+    <div class="notif-item unread">
+      <div class="notif-dot"></div>
+      <div class="notif-body">
+        <p>Mid-term schedule for <strong>Spring 2026</strong> has been published</p>
+        <small>1 hour ago</small>
+      </div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-dot read"></div>
+      <div class="notif-body">
+        <p>Assignment submitted for <strong>Database Management System</strong></p>
+        <small>Yesterday, 4:15 PM</small>
+      </div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-dot read"></div>
+      <div class="notif-body">
+        <p>Grade posted for <strong>Electronic Devices Lab</strong> – Quiz 1</p>
+        <small>2 days ago</small>
+      </div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-dot read"></div>
+      <div class="notif-body">
+        <p>Spring 2026 semester officially started. Welcome back!</p>
+        <small>3 days ago</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="
+  position:fixed; bottom:24px; right:24px; z-index:9999;
+  background:#1a1f2e; color:#fff; padding:12px 20px;
+  border-radius:10px; font-size:13.5px; font-weight:500;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  transform:translateY(80px); opacity:0;
+  transition: all 0.3s ease;
+  pointer-events:none;
+"></div>
+
+<!-- MAIN CONTENT -->
+<div class="main-wrap">
+  <div class="main-content">
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="page-section active" id="page-dashboard">
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Welcome back, Debjeet Baral 👋</h2>
+          <p>University of Information Technology and Sciences &nbsp;·&nbsp; Spring 2026</p>
+        </div>
+        <div class="welcome-badge">
+          <div class="sem">SEMESTER</div>
+          <div class="sem-name">Spring 2026</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card" onclick="navigate('courses', document.querySelector('[onclick*=\"courses\"]'))">
+          <div class="stat-icon blue">📚</div>
+          <div class="stat-info"><div class="val">9</div><div class="lbl">Enrolled Courses</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-info"><div class="val">19.0</div><div class="lbl">Total Credit Hours</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">⚡</div>
+          <div class="stat-info"><div class="val">9</div><div class="lbl">Running Courses</div></div>
+        </div>
+        <div class="stat-card" onclick="navigate('attendance', document.querySelector('[onclick*=\"attendance\"]'))">
+          <div class="stat-icon red">📊</div>
+          <div class="stat-info"><div class="val" id="dashAvgAtt">—</div><div class="lbl">Avg Attendance</div></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h3>My Enrolled Courses</h3>
+          <p class="sub" style="margin-top:3px">Spring 2026 · Department of Computer Science & Engineering</p>
+        </div>
+        <span class="tag-running">● All Running</span>
+      </div>
+
+      <div class="course-table-wrap">
+        <table class="course-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Semester</th>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th>Credits</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="dashCourseBody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h3>Attendance Scan</h3>
+          <p class="sub" style="margin-top:3px">Use your camera to scan the class QR code and mark attendance</p>
+        </div>
+      </div>
+
+      <div class="scan-section">
+        <div class="scan-title">📷 QR Code Scanner</div>
+        <p class="scan-sub">Point your camera at the QR code displayed by your teacher to mark attendance.</p>
+        <div class="scan-course-row">
+          <label>Course:</label>
+          <select id="scanCourse">
+            <option value="">— Select Course —</option>
+            <option value="CSE0613211S">CSE0613211S · Data Structures and Algorithms I</option>
+            <option value="CSE0613212S">CSE0613212S · Data Structures and Algorithms Lab</option>
+            <option value="CSE0611215S">CSE0611215S · Digital Logic Design</option>
+            <option value="CSE0611216S">CSE0611216S · Digital Logic Design Lab</option>
+            <option value="CSE0612215S">CSE0612215S · Database Management System</option>
+            <option value="CSE0612216S">CSE0612216S · Database Management System Lab</option>
+            <option value="MATH0541211S">MATH0541211S · Coordinate Geometry, Linear Algebra &amp; Vector</option>
+            <option value="EEE0714211">EEE0714211 · Electronic Devices and Circuits</option>
+            <option value="EEE0714212">EEE0714212 · Electronic Devices and Circuits Lab</option>
+          </select>
+        </div>
+        <div class="qr-viewport" id="qrViewport">
+          <div class="qr-idle" id="qrIdle">
+            <div class="qr-idle-icon">📷</div>
+            <p>Camera preview will appear here</p>
+          </div>
+          <video id="qr-video" autoplay playsinline muted style="display:none;"></video>
+          <canvas id="qr-canvas" style="display:none;"></canvas>
+          <div class="qr-frame" id="qrFrame" style="display:none;"><span></span><div class="qr-laser"></div></div>
+          <div class="qr-result-overlay" id="qrResultOverlay">
+            <div class="res-icon" id="resIcon"></div>
+            <div class="res-msg" id="resMsg"></div>
+          </div>
+        </div>
+        <div class="scan-controls">
+          <button class="btn-scan" id="btnStart" onclick="startScanner()">📷 &nbsp;Open Camera</button>
+          <button class="btn-stop" id="btnStop" onclick="stopScanner()">⏹ &nbsp;Stop Camera</button>
+        </div>
+        <div class="scan-status" id="scanStatus">Select a course and open the camera to begin.</div>
+        <div class="scan-history" id="scanHistory" style="display:none;">
+          <h4>Recent Scans</h4>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MY COURSES PAGE ===== -->
+    <div class="page-section" id="page-courses">
+      <div class="section-header">
+        <div>
+          <h3>My Courses</h3>
+          <p class="sub" style="margin-top:3px">Spring 2026 · 9 courses enrolled · 19.0 credit hours</p>
+        </div>
+        <span class="tag-running">● All Running</span>
+      </div>
+      <div class="course-table-wrap">
+        <table class="course-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Semester</th>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th>Credits</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="courseBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== ATTENDANCE PAGE ===== -->
+    <div class="page-section" id="page-attendance">
+      <div class="section-header">
+        <div>
+          <h3>Attendance Overview</h3>
+          <p class="sub" style="margin-top:3px">Spring 2026 · Track your attendance per course</p>
+        </div>
+      </div>
+      <div class="attendance-grid" id="attendanceGrid"></div>
+    </div>
+
+    <!-- ===== RESULTS PAGE ===== -->
+    <div class="page-section" id="page-results">
+      <div class="section-header">
+        <div>
+          <h3>Academic Results</h3>
+          <p class="sub" style="margin-top:3px">Spring 2026 · Grades & performance</p>
+        </div>
+      </div>
+      <div class="results-table-wrap">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th>Credits</th>
+              <th>Quiz 1</th>
+               <th>Quiz 2</th>
+              <th>Mid</th>
+              <th>Final</th>
+              <th>Grade</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-card);display:flex;gap:28px;flex-wrap:wrap;align-items:center;">
+        <div style="flex:1;min-width:160px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:8px">Semester GPA</div>
+          <div style="font-size:2.2rem;font-weight:800;color:var(--text-primary)">—</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Results pending</div>
+        </div>
+        <div style="flex:1;min-width:160px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:8px">Total Credits</div>
+          <div style="font-size:2.2rem;font-weight:800;color:var(--blue)">19.0</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Spring 2026</div>
+        </div>
+        <div style="flex:1;min-width:160px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-secondary);margin-bottom:8px">Courses</div>
+          <div style="font-size:2.2rem;font-weight:800;color:var(--text-primary)">9</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">All running</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCHEDULE PAGE ===== -->
+    <div class="page-section" id="page-schedule">
+      <div class="section-header">
+        <div>
+          <h3>Class Schedule</h3>
+          <p class="sub" style="margin-top:3px">Spring 2026 · Weekly timetable</p>
+        </div>
+      </div>
+      <div class="schedule-grid" id="scheduleGrid"></div>
+    </div>
+
+    <!-- ===== CALENDAR PAGE ===== -->
+    <div class="page-section" id="page-calendar">
+      <div class="section-header">
+        <div>
+          <h3>Academic Calendar</h3>
+          <p class="sub" style="margin-top:3px">Spring 2026 · Important dates & events</p>
+        </div>
+      </div>
+      <div class="calendar-list" id="calendarList"></div>
+    </div>
+
+    <!-- ===== PROFILE PAGE ===== -->
+    <div class="page-section" id="page-profile">
+      <div class="section-header">
+        <div><h3>My Profile</h3><p class="sub" style="margin-top:3px">Personal & academic information</p></div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-top">
+          <div class="profile-avatar">DB</div>
+          <div>
+            <div class="profile-name">Debjeet Baral</div>
+            <div class="profile-sub">BSc in Computer Science & Engineering · Spring 2026</div>
+            <div style="margin-top:8px"><span class="tag-running">● Active Student</span></div>
+          </div>
+        </div>
+        <div class="profile-fields">
+          <div class="profile-field"><label>Student ID</label><div class="val">20230101234</div></div>
+          <div class="profile-field"><label>Email</label><div class="val">debjeet.baral@uits.edu.bd</div></div>
+          <div class="profile-field"><label>Department</label><div class="val">Computer Science & Engineering</div></div>
+          <div class="profile-field"><label>Program</label><div class="val">BSc CSE (Hons.)</div></div>
+          <div class="profile-field"><label>Semester</label><div class="val">3rd Semester</div></div>
+          <div class="profile-field"><label>Session</label><div class="val">Spring 2026</div></div>
+          <div class="profile-field"><label>Advisor</label><div class="val">Dr. Md. Rafiqul Islam</div></div>
+          <div class="profile-field"><label>Campus</label><div class="val">UITS Main Campus, Dhaka</div></div>
+          <div class="profile-field"><label>Phone</label><div class="val">+880 1XXXXXXXXX</div></div>
+          <div class="profile-field"><label>CGPA</label><div class="val">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div class="page-section" id="page-settings">
+      <div class="section-header">
+        <div><h3>Settings</h3><p class="sub" style="margin-top:3px">Manage your preferences</p></div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-header">Appearance</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Dark Mode</div><div class="settings-desc">Switch between light and dark themes</div></div>
+          <label class="settings-toggle"><input type="checkbox" id="settingsTheme" onchange="syncTheme(this)"/><span class="settings-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-header">Notifications</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Attendance Reminders</div><div class="settings-desc">Get notified before each class</div></div>
+          <label class="settings-toggle"><input type="checkbox" checked/><span class="settings-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Grade Alerts</div><div class="settings-desc">Notify when new grades are posted</div></div>
+          <label class="settings-toggle"><input type="checkbox" checked/><span class="settings-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Schedule Changes</div><div class="settings-desc">Alert on class cancellations or room changes</div></div>
+          <label class="settings-toggle"><input type="checkbox"/><span class="settings-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-header">Privacy & Security</div>
+        <div class="settings-row">
+          <div><div class="settings-label">Two-Factor Authentication</div><div class="settings-desc">Secure your account with 2FA</div></div>
+          <label class="settings-toggle"><input type="checkbox"/><span class="settings-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Share Attendance Data</div><div class="settings-desc">Allow department to view your attendance</div></div>
+          <label class="settings-toggle"><input type="checkbox" checked/><span class="settings-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-header">Account</div>
+        <div class="settings-row" style="cursor:pointer;" onclick="showToast('📧 Password reset email sent!')">
+          <div><div class="settings-label">Change Password</div><div class="settings-desc">Update your account password</div></div>
+          <span style="color:var(--blue);font-size:18px">›</span>
+        </div>
+        <div class="settings-row" style="cursor:pointer;" onclick="handleLogout()">
+          <div><div class="settings-label" style="color:#ef4444;">Logout</div><div class="settings-desc">Sign out of your account</div></div>
+          <span style="color:#ef4444;font-size:18px">›</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+// ===== DATA =====
+const COURSES = [
+  { code: 'CSE0613211S', name: 'Data Structures and Algorithms I',        credits: 3.0, type: 'theory' },
+  { code: 'CSE0613212S', name: 'Data Structures and Algorithms Lab',      credits: 1.5, type: 'lab'    },
+  { code: 'CSE0611215S', name: 'Digital Logic Design',                    credits: 3.0, type: 'theory' },
+  { code: 'CSE0611216S', name: 'Digital Logic Design Lab',                credits: 1.0, type: 'lab'    },
+  { code: 'CSE0612215S', name: 'Database Management System',              credits: 3.0, type: 'theory' },
+  { code: 'CSE0612216S', name: 'Database Management System Lab',          credits: 1.5, type: 'lab'    },
+  { code: 'MATH0541211S',name: 'Coordinate Geometry, Linear Algebra and Vector Analysis', credits: 3.0, type: 'theory' },
+  { code: 'EEE0714211',  name: 'Electronic Devices and Circuits',         credits: 3.0, type: 'theory' },
+  { code: 'EEE0714212',  name: 'Electronic Devices and Circuits Lab',     credits: 1.0, type: 'lab'    },
+];
+
+const ATT_DATA = {
+  'CSE0613211S': { present: 10, total: 12 },
+  'CSE0613212S': { present: 8,  total: 10 },
+  'CSE0611215S': { present: 7,  total: 12 },
+  'CSE0611216S': { present: 9,  total: 10 },
+  'CSE0612215S': { present: 11, total: 12 },
+  'CSE0612216S': { present: 6,  total: 10 },
+  'MATH0541211S':{ present: 10, total: 12 },
+  'EEE0714211':  { present: 9,  total: 12 },
+  'EEE0714212':  { present: 10, total: 10 },
+};
+
+const SCHEDULE = [
+  { day: 'Sunday',    time: '08:00 – 09:30', course: 'Data Structures and Algorithms I',        room: 'Room 301, CSE Building', code: 'CSE0613211S' },
+  { day: 'Sunday',    time: '09:30 – 11:00', course: 'Digital Logic Design',                    room: 'Room 202, CSE Building', code: 'CSE0611215S' },
+  { day: 'Sunday',    time: '11:00 – 12:00', course: 'Database Management System Lab',          room: 'Lab 105, CSE Building',  code: 'CSE0612216S' },
+  { day: 'Monday',    time: '08:00 – 09:30', course: 'Database Management System',              room: 'Room 304, CSE Building', code: 'CSE0612215S' },
+  { day: 'Monday',    time: '09:30 – 11:00', course: 'Electronic Devices and Circuits',         room: 'Room 201, EEE Building', code: 'EEE0714211'  },
+  { day: 'Monday',    time: '02:00 – 04:30', course: 'Data Structures and Algorithms Lab',      room: 'Lab 103, CSE Building',  code: 'CSE0613212S' },
+  { day: 'Tuesday',   time: '08:00 – 09:30', course: 'Coordinate Geometry, Linear Algebra and Vector Analysis', room: 'Room 401, Math Building', code: 'MATH0541211S' },
+  { day: 'Tuesday',   time: '09:30 – 11:00', course: 'Digital Logic Design',                    room: 'Room 202, CSE Building', code: 'CSE0611215S' },
+  { day: 'Wednesday', time: '08:00 – 09:30', course: 'Data Structures and Algorithms I',        room: 'Room 301, CSE Building', code: 'CSE0613211S' },
+  { day: 'Wednesday', time: '02:00 – 04:30', course: 'Digital Logic Design Lab',                room: 'Lab 106, CSE Building',  code: 'CSE0611216S' },
+  { day: 'Thursday',  time: '08:00 – 09:30', course: 'Database Management System',              room: 'Room 304, CSE Building', code: 'CSE0612215S' },
+  { day: 'Thursday',  time: '09:30 – 11:00', course: 'Electronic Devices and Circuits',         room: 'Room 201, EEE Building', code: 'EEE0714211'  },
+  { day: 'Thursday',  time: '02:00 – 04:30', course: 'Electronic Devices and Circuits Lab',     room: 'Lab 201, EEE Building',  code: 'EEE0714212'  },
+];
+
+const CAL_EVENTS = [
+  { month: 'Jan', day: '15', title: 'Spring 2026 Semester Begins', desc: 'First day of classes', type: 'event' },
+  { month: 'Feb', day: '21', title: 'Language Martyrs Day', desc: 'National holiday – no classes', type: 'holiday' },
+  { month: 'Mar', day: '17', title: 'Mid-term Exams Begin', desc: 'Weeks 1-2 of mid-term examinations', type: 'exam' },
+  { month: 'Mar', day: '26', title: 'Independence Day', desc: 'National holiday – no classes', type: 'holiday' },
+  { month: 'Apr', day: '14', title: 'Pahela Baishakh', desc: 'Bengali New Year – national holiday', type: 'holiday' },
+  { month: 'Apr', day: '22', title: 'Last Date to Drop Courses', desc: 'Deadline to withdraw from courses', type: 'event' },
+  { month: 'May', day: '01', title: 'May Day', desc: 'International Labour Day – no classes', type: 'holiday' },
+  { month: 'May', day: '20', title: 'Final Exams Begin', desc: 'Spring 2026 final examinations start', type: 'exam' },
+  { month: 'Jun', day: '05', title: 'Final Exams End', desc: 'Last day of final examinations', type: 'exam' },
+  { month: 'Jun', day: '15', title: 'Result Publication', desc: 'Spring 2026 semester results published', type: 'event' },
+  { month: 'Jun', day: '30', title: 'Semester Ends', desc: 'Official end of Spring 2026 semester', type: 'event' },
+];
+
+// ===== RENDER HELPERS =====
+function renderCourseRows(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML = COURSES.map((c, i) => `
+    <tr>
+      <td><span class="row-num">${i+1}</span></td>
+      <td style="color:var(--text-secondary);font-size:12.5px">Spring 2026</td>
+      <td><span class="course-code">${c.code}</span></td>
+      <td class="course-name">${c.name}</td>
+      <td><span class="credit-pill">${c.credits.toFixed(1)} cr</span></td>
+      <td><span class="tag-running">Running</span></td>
+    </tr>`).join('');
+}
+
+function renderAttendance() {
+  const grid = document.getElementById('attendanceGrid');
+  if (!grid) return;
+  let totalPct = 0;
+  grid.innerHTML = COURSES.map(c => {
+    const d = ATT_DATA[c.code];
+    const pct = Math.round((d.present / d.total) * 100);
+    totalPct += pct;
+    const cls = pct >= 75 ? 'good' : pct >= 60 ? 'warn' : 'bad';
+    return `
+    <div class="att-card">
+      <div class="att-card-header">
+        <div>
+          <div class="att-card-code">${c.code}</div>
+          <div class="att-card-name">${c.name}</div>
+        </div>
+        <div class="att-pct ${cls}">${pct}%</div>
+      </div>
+      <div class="att-bar-bg"><div class="att-bar-fill ${cls}" style="width:${pct}%"></div></div>
+      <div class="att-meta">
+        <span>Present: ${d.present} / ${d.total} classes</span>
+        <span>${cls === 'good' ? '✅ Good' : cls === 'warn' ? '⚠️ Warning' : '❌ Low'}</span>
+      </div>
+    </div>`;
+  }).join('');
+  const avg = Math.round(totalPct / COURSES.length);
+  const el = document.getElementById('dashAvgAtt');
+  if (el) el.textContent = avg + '%';
+}
+
+function renderSchedule() {
+  const grid = document.getElementById('scheduleGrid');
+  if (!grid) return;
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+  let html = '';
+  days.forEach(day => {
+    const items = SCHEDULE.filter(s => s.day === day);
+    if (items.length === 0) return;
+    html += `<div class="schedule-day-label">${day}</div>`;
+    items.forEach(s => {
+      html += `
+      <div class="schedule-item">
+        <div class="schedule-time">${s.time}</div>
+        <div class="schedule-info">
+          <div class="schedule-course">${s.course}</div>
+          <div class="schedule-room">📍 ${s.room}</div>
+        </div>
+        <span class="schedule-badge">${s.code}</span>
+      </div>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function renderCalendar() {
+  const list = document.getElementById('calendarList');
+  if (!list) return;
+  list.innerHTML = CAL_EVENTS.map(e => `
+    <div class="cal-item">
+      <div class="cal-date">
+        <div class="month">${e.month}</div>
+        <div class="day">${e.day}</div>
+      </div>
+      <div class="cal-info">
+        <div class="cal-title">${e.title}</div>
+        <div class="cal-desc">${e.desc}</div>
+      </div>
+      <span class="cal-type ${e.type}">${e.type.charAt(0).toUpperCase()+e.type.slice(1)}</span>
+    </div>`).join('');
+}
+
+function renderResults() {
+  const tbody = document.getElementById('resultsBody');
+  if (!tbody) return;
+  tbody.innerHTML = COURSES.map((c, i) => `
+    <tr>
+      <td><span class="row-num">${i+1}</span></td>
+      <td><span class="course-code">${c.code}</span></td>
+      <td class="course-name">${c.name}</td>
+      <td><span class="credit-pill">${c.credits.toFixed(1)} cr</span></td>
+      <td><span class="grade-pill grade-NA">—</span></td>
+      <td><span class="grade-pill grade-NA">—</span></td>
+      <td><span class="grade-pill grade-NA">—</span></td>
+      <td><span class="grade-pill grade-NA">Pending</span></td>
+    </tr>`).join('');
+}
+
+// ===== NAVIGATION =====
+function navigate(page, navEl) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + page + "'")) {
+        n.classList.add('active');
+      }
+    });
+  }
+  if (window.innerWidth <= 820) closeSidebar();
+}
+
+// ===== THEME =====
+const html = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const saved = localStorage.getItem('portalTheme') || 'light';
+html.setAttribute('data-theme', saved);
+themeToggle.checked = saved === 'dark';
+document.getElementById('settingsTheme').checked = saved === 'dark';
+
+themeToggle.addEventListener('change', () => {
+  const t = themeToggle.checked ? 'dark' : 'light';
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('portalTheme', t);
+  document.getElementById('settingsTheme').checked = themeToggle.checked;
+});
+
+function syncTheme(el) {
+  themeToggle.checked = el.checked;
+  const t = el.checked ? 'dark' : 'light';
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('portalTheme', t);
+}
+
+// ===== SIDEBAR =====
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ===== NOTIFICATIONS =====
+let notifOpen = false;
+function toggleNotif() {
+  notifOpen = !notifOpen;
+  document.getElementById('notifPanel').classList.toggle('open', notifOpen);
+}
+function markAllRead() {
+  document.querySelectorAll('.notif-item').forEach(el => {
+    el.classList.remove('unread');
+    el.querySelector('.notif-dot').classList.add('read');
+  });
+  document.getElementById('notifDot').style.display = 'none';
+  document.getElementById('attBadge').style.display = 'none';
+  showToast('✅ All notifications marked as read');
+}
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('notifPanel');
+  if (notifOpen && !panel.contains(e.target) && !e.target.closest('.icon-btn')) {
+    notifOpen = false;
+    panel.classList.remove('open');
+  }
+});
+
+// ===== SEARCH =====
+function handleSearch(val) {
+  if (!val.trim()) return;
+  const match = COURSES.filter(c =>
+    c.name.toLowerCase().includes(val.toLowerCase()) ||
+    c.code.toLowerCase().includes(val.toLowerCase())
+  );
+  if (match.length > 0) {
+    navigate('courses', null);
+    showToast(`🔍 Found ${match.length} course(s) matching "${val}"`);
+  } else {
+    showToast(`No courses found for "${val}"`);
+  }
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.transform = 'translateY(0)';
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.transform = 'translateY(80px)';
+    t.style.opacity = '0';
+  }, 2800);
+}
+
+// ===== LOGOUT =====
+function handleLogout() {
+  if (confirm('Are you sure you want to logout?')) {
+    showToast('👋 Logging out...');
+    setTimeout(() => {
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.5s';
+    }, 500);
+  }
+}
+
+// ===== QR SCANNER =====
+let stream = null, animFrame = null, scanning = false;
+const scanHistory = [];
+
+const video    = document.getElementById('qr-video');
+const canvas   = document.getElementById('qr-canvas');
+const ctx      = canvas.getContext('2d');
+const qrIdle   = document.getElementById('qrIdle');
+const qrFrame  = document.getElementById('qrFrame');
+const btnStart = document.getElementById('btnStart');
+const btnStop  = document.getElementById('btnStop');
+const statusEl = document.getElementById('scanStatus');
+const qrOverlay = document.getElementById('qrResultOverlay');
+const resIcon  = document.getElementById('resIcon');
+const resMsg   = document.getElementById('resMsg');
+
+async function startScanner() {
+  const course = document.getElementById('scanCourse').value;
+  if (!course) { setStatus('⚠️ Please select a course first.', 'err'); return; }
+  if (typeof jsQR === 'undefined') { setStatus('⚠️ QR library not loaded. Check your connection.', 'err'); return; }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } }
+    });
+    video.srcObject = stream;
+    video.style.display = 'block';
+    qrIdle.style.display = 'none';
+    qrFrame.style.display = 'block';
+    btnStart.style.display = 'none';
+    btnStop.style.display = 'inline-flex';
+    scanning = true;
+    qrOverlay.className = 'qr-result-overlay';
+    setStatus('📷 Camera active — point at a QR code...', 'active');
+    video.addEventListener('loadedmetadata', tick);
+  } catch (err) {
+    const msgs = {
+      NotAllowedError: '❌ Camera permission denied. Please allow camera access.',
+      NotFoundError: '❌ No camera found on this device.',
+    };
+    setStatus(msgs[err.name] || '❌ Could not access camera: ' + err.message, 'err');
+  }
+}
+
+function tick() {
+  if (!scanning) return;
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+    if (code) { onQRFound(code.data); return; }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+function onQRFound(data) {
+  scanning = false;
+  cancelAnimationFrame(animFrame);
+  const sel = document.getElementById('scanCourse');
+  const courseName = sel.options[sel.selectedIndex].text.split(' · ')[1] || sel.value;
+  const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  resIcon.textContent = '✅';
+  resMsg.textContent = `Attendance marked!\n${courseName}\n${timeStr}`;
+  qrOverlay.className = 'qr-result-overlay success';
+  setStatus('✅ Attendance marked successfully!', 'ok');
+  scanHistory.unshift({ course: courseName, time: timeStr });
+  renderHistory();
+  showToast(`✅ Attendance marked for ${courseName}`);
+  setTimeout(() => { stopScanner(); qrOverlay.className = 'qr-result-overlay'; }, 3000);
+}
+
+function stopScanner() {
+  scanning = false;
+  cancelAnimationFrame(animFrame);
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  video.srcObject = null;
+  video.style.display = 'none';
+  qrIdle.style.display = 'flex';
+  qrFrame.style.display = 'none';
+  btnStart.style.display = 'inline-flex';
+  btnStop.style.display = 'none';
+  if (!statusEl.classList.contains('ok'))
+    setStatus('Camera stopped. Select a course and open camera to scan.', '');
+}
+
+function setStatus(msg, type) {
+  statusEl.textContent = msg;
+  statusEl.className = 'scan-status' + (type ? ' ' + type : '');
+}
+
+function renderHistory() {
+  const wrap = document.getElementById('scanHistory');
+  const list = document.getElementById('historyList');
+  if (scanHistory.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = scanHistory.map(s => `
+    <div class="history-item">
+      <span class="h-icon">✅</span>
+      <div class="h-info">
+        <div class="h-name">${s.course}</div>
+        <div class="h-time">Scanned at ${s.time}</div>
+      </div>
+      <span class="h-tag present">Present</span>
+    </div>`).join('');
+}
+
+// ===== INIT =====
+renderCourseRows('dashCourseBody');
+renderCourseRows('courseBody');
+renderAttendance();
+renderSchedule();
+renderCalendar();
+renderResults();
+</script>
+</body>
+</html>
+
+

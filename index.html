@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title> UITS_NEXTGEN LogIn</title>
+
+  <!-- Tab favicon linking to UITS Wikipedia -->
+  <link rel="icon" type="image/png" href="/University_of_Information_Technology_and_Sciences_Seal.png" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- Dark/Light Toggle -->
+  <div class="theme-toggle-wrap">
+    <span class="icon-sun">☀️</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="themeToggle" />
+      <span class="slider"></span>
+    </label>
+    <span class="icon-moon">🌙</span>
+  </div>
+
+  <div class="portal-layout">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+      <div class="left-inner">
+        <div class="logo-wrap">
+          <div class="logo-shield">
+            <a href="https://en.wikipedia.org/wiki/University_of_Information_Technology_and_Sciences" target="_blank" rel="noopener noreferrer">
+              <img class="uits-logo" src="/University_of_Information_Technology_and_Sciences_Seal.png" alt="UITS Logo" />
+            </a>
+          </div>
+        </div>
+        <p class="welcome-label">WELCOME TO</p>
+        <h1 class="portal-title">UITS<br/>NEXTGEN</h1>
+        <p class="portal-sub">Your gateway to academic success.<br/>Login to access your dashboard.</p>
+
+        <div class="feature-cards">
+          <div class="feat-card">
+            <div class="feat-icon">🎓</div>
+            <div class="feat-text">
+              <strong>View Attendance</strong>
+              <span>Track your attendance</span>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📋</div>
+            <div class="feat-text">
+              <strong>Check Results</strong>
+              <span>See your marks and grades</span>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📅</div>
+            <div class="feat-text">
+              <strong>Class Schedule</strong>
+              <span>View your class timetable</span>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">👤</div>
+            <div class="feat-text">
+              <strong>Profile Management</strong>
+              <span>Update your profile information</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 University of Information Technology and Sciences. All rights reserved.</p>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="form-card">
+
+        <!-- Icon -->
+        <div class="form-icon">🎓</div>
+
+        <!-- Tab: Login / Sign Up -->
+        <div class="tab-row">
+          <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Login</button>
+          <button class="tab-btn" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <!-- Role Selector -->
+        <div class="role-row">
+          <button class="role-btn active" id="roleStudent" onclick="switchRole('student')">
+            🎓 Student
+          </button>
+          <button class="role-btn" id="roleTeacher" onclick="switchRole('teacher')">
+            🏫 Teacher
+          </button>
+        </div>
+
+        <!-- Dynamic Heading -->
+        <h2 class="form-title" id="formTitle">Student Login</h2>
+        <p class="form-sub" id="formSub">Login to your account to continue</p>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm">
+          <div class="input-group">
+            <span class="input-icon">👤</span>
+            <input type="text" id="loginId" placeholder="Student ID or Email" />
+          </div>
+          <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="loginPass" placeholder="Password" />
+            <button class="eye-btn" onclick="togglePw('loginPass', this)">👁️</button>
+          </div>
+          <div class="row-space">
+            <label class="check-label">
+              <input type="checkbox" checked /> Remember Me
+            </label>
+            <a href="#" class="link-blue" onclick="openForgotPassword(); return false;">Forgot Password?</a>
+          </div>
+          <button class="btn-primary" onclick="handleLogin()">LOGIN</button>
+
+          <!-- Teacher admin notice (hidden by default) -->
+          <div id="adminNotice" style="display:none; margin-top:12px; background:var(--blue-light); border:1px solid var(--blue); border-radius:10px; padding:10px 14px; font-size:12.5px; color:var(--blue); text-align:center;">
+            🏫 Teacher accounts are managed by the administrator.
+            <a href="#" class="link-blue" style="font-size:12.5px;" onclick="openAdminInfo(); return false;">Learn more</a>
+          </div>
+
+          <p class="bottom-text">Don't have an account? <a href="#" class="link-blue" onclick="switchTab('signup'); return false;">Sign up here</a></p>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div id="signupForm" style="display:none;">
+          <div class="input-row">
+            <div class="input-group">
+              <span class="input-icon">👤</span>
+              <input type="text" placeholder="First Name" />
+            </div>
+            <div class="input-group">
+              <span class="input-icon">👤</span>
+              <input type="text" placeholder="Last Name" />
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-icon">✉️</span>
+            <input type="email" placeholder="Email Address" />
+          </div>
+          <div class="input-group" id="signupIdWrap">
+            <span class="input-icon">🪪</span>
+            <input type="text" id="signupId" placeholder="Student ID" />
+          </div>
+          <div class="input-group">
+            <span class="input-icon">🏛️</span>
+            <input type="text" placeholder="Department" />
+          </div>
+          <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="signupPass" placeholder="Password" />
+            <button class="eye-btn" onclick="togglePw('signupPass', this)">👁️</button>
+          </div>
+          <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="signupPass2" placeholder="Confirm Password" />
+            <button class="eye-btn" onclick="togglePw('signupPass2', this)">👁️</button>
+          </div>
+          <button class="btn-primary" onclick="handleSignup()">CREATE ACCOUNT</button>
+          <p class="bottom-text">Already have an account? <a href="#" class="link-blue" onclick="switchTab('login'); return false;">Login here</a></p>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast" class="toast"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FORGOT PASSWORD MODAL ===== -->
+  <div id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:18px; padding:32px 28px; width:100%; max-width:380px; box-shadow:var(--shadow); position:relative;">
+      <div style="font-size:36px; text-align:center; margin-bottom:8px;">🔑</div>
+      <h3 style="font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; text-align:center; color:var(--text-primary); margin-bottom:6px;">Forgot Password?</h3>
+      <p style="font-size:13px; color:var(--text-secondary); text-align:center; margin-bottom:20px;">Enter your email and we'll send you a reset link.</p>
+      <div class="input-group">
+        <span class="input-icon">✉️</span>
+        <input type="email" id="forgotEmail" placeholder="Your email address" />
+      </div>
+      <button class="btn-primary" style="margin-top:8px;" onclick="submitForgotPassword()">SEND RESET LINK</button>
+      <p style="font-size:13px; color:var(--text-secondary); text-align:center; margin-top:14px;">
+        <a href="#" class="link-blue" onclick="hideModal('forgotModal'); return false;">← Back to Login</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== TEACHER ADMIN MODAL ===== -->
+  <div id="adminModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:18px; padding:32px 28px; width:100%; max-width:400px; box-shadow:var(--shadow); position:relative;">
+      <div style="font-size:36px; text-align:center; margin-bottom:8px;">🏫</div>
+      <h3 style="font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; text-align:center; color:var(--text-primary); margin-bottom:6px;">Teacher Account Access</h3>
+      <p style="font-size:13.5px; color:var(--text-secondary); text-align:center; margin-bottom:20px; line-height:1.6;">Teacher and administrative accounts are created and managed by the <strong style="color:var(--text-primary);">UITS System Administrator</strong>.</p>
+      <div style="background:var(--blue-light); border:1px solid var(--blue); border-radius:10px; padding:14px 16px; margin-bottom:20px;">
+        <p style="font-size:13px; color:var(--blue); line-height:1.6; margin:0;">
+          📧 &nbsp;Contact: <strong>admin@uits.edu.bd</strong><br/>
+          📞 &nbsp;Phone: <strong>+880 2-XXXX-XXXX</strong><br/>
+          🕐 &nbsp;Office Hours: Sat–Thu, 9AM–5PM
+        </p>
+      </div>
+      <button class="btn-primary" onclick="hideModal('adminModal')">Got it</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
